@@ -1,0 +1,9 @@
+[Plymouth Theme]
+Name=tung
+Description=display tung style loader
+Comment=created By Aditya Shakya (@adi1090x)
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/tung
+ScriptFile=/usr/share/plymouth/themes/tung/tung.script

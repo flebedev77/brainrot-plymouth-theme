@@ -1,0 +1,128 @@
+// Screen size
+screen.w = Window.GetWidth(0);
+screen.h = Window.GetHeight(0);
+screen.half.w = Window.GetWidth(0) / 2;
+screen.half.h = Window.GetHeight(0) / 2;
+
+// Question prompt
+question = null;
+answer = null;
+
+// Message
+message = null;
+
+// Password prompt
+bullets = null;
+prompt = null;
+bullet.image = Image.Text("*", 1, 1, 1);
+
+// Flow
+state.status = "play";
+state.time = 0.0;
+
+spinner_frames = 357;
+for (i = 0; i < spinner_frames; i++)
+  spinner_image[i] = Image("throbberframes/frame_" + (i+1) + ".png").Scale(40, 40);
+spinner_sprite = Sprite();
+
+spinner_sprite.SetImage(spinner_image[1]);
+spinner_sprite.SetX(Window.GetX() + (Window.GetWidth(0) / 2 - spinner_image[0].GetWidth() / 2));
+spinner_sprite.SetY(Window.GetHeight() - spinner_image[0].GetHeight() - 60);
+
+logo_frame_amount = 700;
+logo_loadedframes_amount = 10;
+
+for (i = 0; i < logo_loadedframes_amount; i++)
+  logo_image[i] = Image("tunganim/tungtung-" + (i+1) + ".png").Scale(500, 320);
+logo_sprite = Sprite();
+logo_sprite.SetImage(logo_image[0]);
+logo_sprite.SetX(Window.GetX() + (Window.GetWidth() / 2 - logo_image[0].GetWidth() / 2));
+logo_sprite.SetY(Window.GetY() + (Window.GetHeight() / 2 - logo_image[0].GetHeight() / 2));
+
+# title
+title_image = Image.Text("Tung Tung Tung Sahur is on it!", 1, 1, 1, 1, "Sans 20");
+title_sprite = Sprite();
+
+title_sprite.SetImage(title_image);
+title_sprite.SetX(Window.GetX() + (Window.GetWidth() / 2 - title_image.GetWidth() / 2));
+title_sprite.SetY(Window.GetHeight() - title_image.GetHeight() - 140);
+
+
+progress = 0;
+
+fun refresh_callback ()
+{
+  logo_sprite.SetImage(logo_image[Math.Int(progress * 0.5) % logo_loadedframes_amount]);
+  spinner_sprite.SetImage(spinner_image[Math.Int(progress * 2) % spinner_frames]);
+
+  if (logo_loadedframes_amount < logo_frame_amount && progress % 4 > 1)
+  {
+    logo_image[logo_loadedframes_amount] = Image("tunganim/tungtung-" + (logo_loadedframes_amount+1) + ".png").Scale(500, 320);
+    logo_loadedframes_amount++;
+  }
+
+  progress++;
+}
+  
+Plymouth.SetRefreshFunction (refresh_callback);
+
+//------------------------------------- Password prompt -------------------------------
+fun DisplayQuestionCallback(prompt, entry) {
+    question = null;
+    answer = null;
+
+    if (entry == "")
+        entry = "<answer>";
+
+    question.image = Image.Text(prompt, 1, 1, 1);
+    question.sprite = Sprite(question.image);
+    question.sprite.SetX(screen.half.w - question.image.GetWidth() / 2);
+    question.sprite.SetY(screen.h - 4 * question.image.GetHeight());
+
+    answer.image = Image.Text(entry, 1, 1, 1);
+    answer.sprite = Sprite(answer.image);
+    answer.sprite.SetX(screen.half.w - answer.image.GetWidth() / 2);
+    answer.sprite.SetY(screen.h - 2 * answer.image.GetHeight());
+}
+Plymouth.SetDisplayQuestionFunction(DisplayQuestionCallback);
+
+//------------------------------------- Password prompt -------------------------------
+fun DisplayPasswordCallback(nil, bulletCount) {
+    state.status = "pause";
+    totalWidth = bulletCount * bullet.image.GetWidth();
+    startPos = screen.half.w - totalWidth / 2;
+
+    prompt.image = Image.Text("Enter Password", 1, 1, 1);
+    prompt.sprite = Sprite(prompt.image);
+    prompt.sprite.SetX(screen.half.w - prompt.image.GetWidth() / 2);
+    prompt.sprite.SetY(screen.h - 4 * prompt.image.GetHeight());
+
+    // Clear all bullets (user might hit backspace)
+    bullets = null;
+    for (i = 0; i < bulletCount; i++) {
+        bullets[i].sprite = Sprite(bullet.image);
+        bullets[i].sprite.SetX(startPos + i * bullet.image.GetWidth());
+        bullets[i].sprite.SetY(screen.h - 2 * bullet.image.GetHeight());
+    }
+}
+Plymouth.SetDisplayPasswordFunction(DisplayPasswordCallback);
+
+//--------------------------- Normal display (unset all text) ----------------------
+fun DisplayNormalCallback() {
+    state.status = "play";
+    bullets = null;
+    prompt = null;
+    message = null;
+    question = null;
+    answer = null;
+}
+Plymouth.SetDisplayNormalFunction(DisplayNormalCallback);
+
+//----------------------------------------- Message --------------------------------
+fun MessageCallback(text) {
+    message.image = Image.Text(text, 1, 1, 1);
+    message.sprite = Sprite(message.image);
+    message.sprite.SetPosition(screen.half.w - message.image.GetWidth() / 2, message.image.GetHeight());
+}
+Plymouth.SetMessageFunction(MessageCallback);
+
